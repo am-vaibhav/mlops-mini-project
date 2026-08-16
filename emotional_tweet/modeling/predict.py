@@ -4,14 +4,32 @@ import pickle
 import json
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 import os
+import logging
+# logging configuration
+logger = logging.getLogger('model_evaluation')
+logger.setLevel('DEBUG')
 
-from emotional_tweet.config import MODELS_DIR, FEATURES_DATA_DIR, PROJ_ROOT
+console_handler = logging.StreamHandler()
+console_handler.setLevel('DEBUG')
+
+file_handler = logging.FileHandler('model_evaluation_errors.log')
+file_handler.setLevel('ERROR')
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+from emotional_tweet.config import MODELS_DIR, FEATURES_DATA_DIR, REPORTS_DIR
 
 test_data = pd.read_csv(str(FEATURES_DATA_DIR / 'test_tfidf.csv'))
 X_test = test_data.iloc[:, :-1].values
 y_test = test_data.iloc[:, -1].values
 
-model = pickle.load(open(str(MODELS_DIR / 'model.pkl'), 'rb'))
+with open(str(MODELS_DIR / 'model.pkl'), 'rb') as f:
+    model = pickle.load(f)
 
 y_pred = model.predict(X_test)
 y_pred_proba = model.predict_proba(X_test)[:, 1]
@@ -27,4 +45,45 @@ metrics_dict = {
     'recall': recall,
     'auc': auc
 }
-json.dump(metrics_dict, open(str(PROJ_ROOT / 'metrics_dict.json'), 'w'))
+
+with open(str(REPORTS_DIR / 'metrics_dict.json'), 'w') as f:
+    json.dump(metrics_dict, f)
+
+import mlflow
+mlflow.set_tracking_uri("https://dagshub.com/vaibhav.vaibhav.rai009/mlops-mini-project.mlflow")
+import dagshub
+dagshub.init(repo_owner='vaibhav.vaibhav.rai009', repo_name='mlops-mini-project', mlflow=True)
+
+mlflow.set_experiment("dvc-pipeline")
+
+with mlflow.start_run() as run:  # Start an MLflow run
+    # Log metrics to MLflow
+    for metric_name, metric_value in metrics_dict.items():
+        mlflow.log_metric(metric_name, metric_value)
+
+    # Log model parameters to MLflow
+    if hasattr(model, 'get_params'):
+        params = model.get_params()
+        for param_name, param_value in params.items():
+            mlflow.log_param(param_name, param_value)
+
+    # Log model to MLflow
+    mlflow.sklearn.log_model(model, "model")
+
+    # Save model info
+    run_id = run.info.run_id
+    model_path = f"runs:/{run_id}/model"
+    model_info = {'run_id': run_id, 'model_path': model_path}
+    with open(str(REPORTS_DIR / 'model_info.json'), 'w') as file:
+        json.dump(model_info, file, indent=4)
+
+    # Log the model info file to MLflow
+    mlflow.log_artifact(str(REPORTS_DIR / 'model_info.json'))
+
+    # Log the metrics file to MLflow
+    mlflow.log_artifact(str(REPORTS_DIR / 'metrics_dict.json'))
+
+
+    # Log the evaluation errors log file to MLflow
+    if os.path.exists('model_evaluation_errors.log'):
+        mlflow.log_artifact('model_evaluation_errors.log')

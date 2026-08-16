@@ -1,0 +1,103 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python -m emotional_tweet.dataset
+    deps:
+    - path: emotional_tweet/dataset.py
+      hash: md5
+      md5: a62f75af84eb17da2481091c0b12c15a
+      size: 3553
+    params:
+      params.yaml:
+        data_ingestion:
+          test_size: 0.3
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: cdbc97ec2b63b571654ff33a9368f91e.dir
+      size: 817597
+      nfiles: 2
+  data_preprocessing:
+    cmd: python -m emotional_tweet.data_preprocessing
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: cdbc97ec2b63b571654ff33a9368f91e.dir
+      size: 817597
+      nfiles: 2
+    - path: emotional_tweet/data_preprocessing.py
+      hash: md5
+      md5: e0e260aa4acfbc02de9c6e9cea40f569
+      size: 2355
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 79506b06ea753b0277d2803085910507.dir
+      size: 555834
+      nfiles: 2
+  feature_engineering:
+    cmd: python -m emotional_tweet.features
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 79506b06ea753b0277d2803085910507.dir
+      size: 555834
+      nfiles: 2
+    - path: emotional_tweet/features.py
+      hash: md5
+      md5: 9e51b1a89a19846631be0d07730db3fd
+      size: 1383
+    params:
+      params.yaml:
+        feature_engineering:
+          max_features: 200
+    outs:
+    - path: data/features
+      hash: md5
+      md5: 9f054d2a475c1307cdd71f616b9b4f20.dir
+      size: 8822858
+      nfiles: 2
+  model_building:
+    cmd: python -m emotional_tweet.modeling.train
+    deps:
+    - path: data/features
+      hash: md5
+      md5: 9f054d2a475c1307cdd71f616b9b4f20.dir
+      size: 8822858
+      nfiles: 2
+    - path: emotional_tweet/modeling/train.py
+      hash: md5
+      md5: 88b7c8b00a1f4c5c981f65774335ee8b
+      size: 784
+    params:
+      params.yaml:
+        model_building:
+          C: 1
+          penalty: l2
+          solver: liblinear
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: ea64c3e38a6baae78e4724a6c2d327fc
+      size: 2296
+  model_evaluation:
+    cmd: python -m emotional_tweet.modeling.predict
+    deps:
+    - path: data/features
+      hash: md5
+      md5: 9f054d2a475c1307cdd71f616b9b4f20.dir
+      size: 8822858
+      nfiles: 2
+    - path: emotional_tweet/modeling/predict.py
+      hash: md5
+      md5: ca162db6a78b6688542b9645e8e081c0
+      size: 2824
+    - path: models/model.pkl
+      hash: md5
+      md5: ea64c3e38a6baae78e4724a6c2d327fc
+      size: 2296
+    outs:
+    - path: reports/metrics_dict.json
+      hash: md5
+      md5: 7d8e8e72bc0352a2ae02f89a67929204
+      size: 122
