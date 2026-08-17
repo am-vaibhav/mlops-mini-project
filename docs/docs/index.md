@@ -1,10 +1,75 @@
-# mlops-mini-project documentation!
+MLOps Mini Project — Tweet Sentiment Classification
+=====================================================
 
-## Description
+This project builds an end-to-end MLOps pipeline for classifying tweet emotions (happiness vs sadness) using DVC for pipeline orchestration, MLflow for experiment tracking, and DagsHub as the remote MLflow server.
 
-A short description of the project.
+## Dataset
 
-## Commands
+**Source:** [CampusX Tweet Emotions Dataset](https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv)
 
-The Makefile contains the central entry points for common tasks related to this project.
+| Column | Description |
+|--------|-------------|
+| `tweet_id` | Unique tweet identifier (dropped during ingestion) |
+| `sentiment` | Emotion label — filtered to `happiness` (1) and `sadness` (0) |
+| `content` | Raw tweet text |
 
+---
+
+## Project Structure
+
+```text
+mlops-mini-project/
+├── data/
+│   ├── raw/                  # Train/test split (DVC tracked)
+│   ├── processed/            # Cleaned text data (DVC tracked)
+│   └── features/             # TF-IDF features (DVC tracked)
+├── models/
+│   └── model.pkl             # Trained model (DVC tracked)
+├── reports/
+│   ├── metrics_dict.json     # Evaluation metrics (DVC metric)
+│   └── model_info.json       # MLflow run_id and model_id
+├── emotional_tweet/          # Source code package
+│   ├── config.py             # All path constants (PROJ_ROOT, DATA_DIR, etc.)
+│   ├── dataset.py            # Stage 1: Data ingestion
+│   ├── data_preprocessing.py # Stage 2: Text preprocessing
+│   ├── features.py           # Stage 3: TF-IDF feature engineering
+│   └── modeling/
+│       ├── train.py           # Stage 4: Model training
+│       ├── predict.py         # Stage 5: Evaluation + MLflow logging
+│       └── register_model.py  # Stage 6: Model registry
+├── notebooks/                 # Standalone experiments
+│   ├── dagshub_setup.py       # DagsHub + MLflow connection test
+│   ├── exp1_bow_vs_tfidf.py   # BoW vs TF-IDF comparison
+│   └── exp3_lor_bow_hp.py     # LogisticRegression hyperparameter tuning
+├── dvc.yaml                   # DVC pipeline definition
+├── dvc.lock                   # DVC pipeline state (auto-generated)
+├── params.yaml                # Hyperparameters
+└── requirements.txt
+```
+
+---
+
+## How It All Connects
+
+```text
+params.yaml ──→ dataset.py ──→ data_preprocessing.py ──→ features.py ──→ train.py ──→ predict.py ──→ register_model.py
+                    │                   │                     │              │            │                │
+                  data/raw         data/processed        data/features   models/    reports/         MLflow
+                                                                        model.pkl  metrics_dict.json  Registry
+```
+
+- **Git tracks:** code, dvc.yaml, dvc.lock, params.yaml, reports/metrics_dict.json
+- **DVC tracks:** data/, models/ (large files pushed to S3 remote)
+- **MLflow tracks:** metrics, parameters, model artifacts, model registry (on DagsHub)
+
+---
+
+## Tools Used
+
+| Tool | Purpose |
+|------|---------|
+| **DVC** | Data versioning, pipeline orchestration, remote storage (S3) |
+| **MLflow** | Experiment tracking, model logging, model registry |
+| **DagsHub** | Remote MLflow tracking server |
+| **scikit-learn** | LogisticRegression, TF-IDF, metrics |
+| **NLTK** | Text preprocessing (stopwords, lemmatization) |

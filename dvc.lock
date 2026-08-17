@@ -90,8 +90,8 @@ stages:
       nfiles: 2
     - path: emotional_tweet/modeling/predict.py
       hash: md5
-      md5: 90fd1f7a3526d2c5b11e7f627c6c5284
-      size: 2882
+      md5: ecd544e94cb233181f498b0356b1b267
+      size: 2993
     - path: models/model.pkl
       hash: md5
       md5: ea64c3e38a6baae78e4724a6c2d327fc
@@ -110,5 +110,5 @@ stages:
       size: 2367
     - path: reports/model_info.json
       hash: md5
-      md5: 9eafbb3422a60a4af83a323d5e5c99f6
+      md5: 143404d3fcc7a4cacd07910c4670e389
       size: 170
