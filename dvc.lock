@@ -45,8 +45,8 @@ stages:
       nfiles: 2
     - path: emotional_tweet/features.py
       hash: md5
-      md5: 9e51b1a89a19846631be0d07730db3fd
-      size: 1383
+      md5: 51a50e7b710cdd9786fd622d389cbd51
+      size: 1476
     params:
       params.yaml:
         feature_engineering:
@@ -57,6 +57,10 @@ stages:
       md5: 9f054d2a475c1307cdd71f616b9b4f20.dir
       size: 8822858
       nfiles: 2
+    - path: models/vectorizer.pkl
+      hash: md5
+      md5: b82273538f7bab72c806b31d16921ad2
+      size: 7658
   model_building:
     cmd: python -m emotional_tweet.modeling.train
     deps:

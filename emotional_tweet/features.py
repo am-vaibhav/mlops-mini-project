@@ -5,6 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import os
 import yaml
+import pickle
 
 from emotional_tweet.config import PROCESSED_DATA_DIR, FEATURES_DATA_DIR, PROJ_ROOT
 
@@ -28,6 +29,8 @@ train_df['label'] = y_train
 
 test_df = pd.DataFrame(X_test_tfidf.toarray())
 test_df['label'] = y_test
+
+pickle.dump(vectorizer, open(str(PROJ_ROOT / "models/vectorizer.pkl"), "wb"))
 
 data_path = str(FEATURES_DATA_DIR)
 os.makedirs(data_path, exist_ok=True)

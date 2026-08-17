@@ -26,6 +26,7 @@ stages:
     - feature_engineering
     outs:
     - data/features
+    - models/vectorizer.pkl
   model_building:
     cmd: python -m emotional_tweet.modeling.train
     deps:
