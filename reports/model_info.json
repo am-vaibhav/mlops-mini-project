@@ -1,4 +1,5 @@
 {
-    "run_id": "c7e5dc842f7440ce9d63008169930d36",
-    "model_path": "runs:/c7e5dc842f7440ce9d63008169930d36/model"
+    "run_id": "33342daa9658455f83889cec917dcf24",
+    "model_id": "m-b1849c074d8048459a6b54439a0a89b7",
+    "model_path": "models:/m-b1849c074d8048459a6b54439a0a89b7"
 }

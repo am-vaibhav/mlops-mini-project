@@ -50,6 +50,7 @@ with open(str(REPORTS_DIR / 'metrics_dict.json'), 'w') as f:
     json.dump(metrics_dict, f)
 
 import mlflow
+from mlflow.models import infer_signature
 mlflow.set_tracking_uri("https://dagshub.com/vaibhav.vaibhav.rai009/mlops-mini-project.mlflow")
 import dagshub
 dagshub.init(repo_owner='vaibhav.vaibhav.rai009', repo_name='mlops-mini-project', mlflow=True)
@@ -68,12 +69,13 @@ with mlflow.start_run() as run:  # Start an MLflow run
             mlflow.log_param(param_name, param_value)
 
     # Log model to MLflow
-    mlflow.sklearn.log_model(model, "model")
+    signature = infer_signature(X_test, y_pred)
+    model_result = mlflow.sklearn.log_model(model, artifact_path="model", signature=signature)
 
     # Save model info
     run_id = run.info.run_id
-    model_path = f"runs:/{run_id}/model"
-    model_info = {'run_id': run_id, 'model_path': model_path}
+    model_id = model_result.model_id
+    model_info = {'run_id': run_id, 'model_id': model_id, 'model_path': f"models:/{model_id}"}
     with open(str(REPORTS_DIR / 'model_info.json'), 'w') as file:
         json.dump(model_info, file, indent=4)
 

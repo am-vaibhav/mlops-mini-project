@@ -1,3 +1,6 @@
+# cmd: Tells DVC what to execute — the actual command to run.
+# deps: Tells DVC what to watch for changes — if the file changes, DVC knows this stage needs to be re-run.
+# When using python -m, we run a module (dot-separated, no .py) instead of a file (path with / and .py).
 stages:
   data_ingestion:
     cmd: python -m emotional_tweet.dataset
@@ -41,3 +44,9 @@ stages:
     metrics:
     - reports/metrics_dict.json:
         cache: false
+
+  model_registration:
+    cmd: python -m emotional_tweet.modeling.register_model
+    deps:
+      - reports/model_info.json
+      - emotional_tweet/modeling/register_model.py
