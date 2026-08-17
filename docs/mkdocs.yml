@@ -1,4 +1,9 @@
 site_name: mlops-mini-project
-# 
 site_author: vaibhav
-# 
+
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+  - DVC Pipeline: pipeline.md
+  - Experiments: experiments.md
+  - DVC & MLflow: dvc-and-mlflow.md
