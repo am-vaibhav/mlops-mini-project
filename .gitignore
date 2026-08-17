@@ -191,3 +191,5 @@ cython_debug/
 .pypirc
 
 temp
+models
+data
