@@ -3,7 +3,8 @@ import re
 import string
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-
+import nltk
+nltk.download('stopwords')
 from emotional_tweet.config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
 
