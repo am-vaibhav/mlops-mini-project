@@ -233,6 +233,7 @@ None → Staging → Production → Archived
 | Processed data | Yes (S3) | No | No |
 | Feature data | Yes (S3) | No | No |
 | Model (.pkl) | Yes (S3) | Yes (artifact) | No |
+| Vectorizer (.pkl) | Yes (S3) | No | No |
 | Metrics (JSON) | Yes (metric) | Yes (log_metric) | Yes |
 | Hyperparameters | No | Yes (log_param) | Yes (params.yaml) |
 | Code | No | No | Yes |
@@ -243,3 +244,86 @@ DVC and MLflow complement each other:
 - **DVC** handles the pipeline and data versioning
 - **MLflow** handles experiment tracking and model management
 - **Git** handles code versioning
+
+---
+
+## How to Decide — DVC or MLflow?
+
+### The Two Rules
+
+```text
+┌────────────────┬──────────────────────────────────┬──────────────────────────────────────────┐
+│                │               DVC                │                  MLflow                  │
+├────────────────┼──────────────────────────────────┼──────────────────────────────────────────┤
+│ Purpose        │ Version & reproduce              │ Track & compare                          │
+├────────────────┼──────────────────────────────────┼──────────────────────────────────────────┤
+│ Think of it as │ A hard drive with history        │ A lab notebook                           │
+├────────────────┼──────────────────────────────────┼──────────────────────────────────────────┤
+│ Saves          │ Files your pipeline needs to run │ Records about what happened during a run │
+└────────────────┴──────────────────────────────────┴──────────────────────────────────────────┘
+```
+
+### DVC — "Can the next stage use this?"
+
+If a file is **consumed by another stage** or **needed to serve the model**, it goes in DVC:
+
+```text
+data/raw/              → preprocessing needs it
+data/processed/        → feature engineering needs it
+data/features/         → training needs it
+models/model.pkl       → evaluation needs it, app serves it
+models/vectorizer.pkl  → app needs it to transform user input
+```
+
+**Rule: If deleting this file breaks `dvc repro` or the app, it belongs in DVC.**
+
+### MLflow — "Do I want to compare this across runs?"
+
+If you want to **look back and compare**, it goes in MLflow:
+
+```text
+metrics (accuracy, f1)     → "which run was best?"
+params (C=1, penalty=l2)   → "what settings produced that?"
+model artifact             → "I want to deploy run #47's model"
+signature                  → "what does this model expect?"
+```
+
+**Rule: If you'd put this in a spreadsheet to compare experiments, it belongs in MLflow.**
+
+---
+
+## WHEN to Save — Stage by Stage
+
+```text
+┌─────────────────────┬─────────────────────────────────────┬────────────────────────────────────────────────────────────┐
+│        Stage        │          DVC (save files)           │                    MLflow (log records)                    │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Data ingestion      │ Save train/test splits              │ Nothing — no experiment yet                                │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Preprocessing       │ Save cleaned data                   │ Nothing — no metrics yet                                   │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Feature engineering │ Save feature matrices + vectorizer  │ Nothing — no model yet                                     │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Training            │ Save model.pkl                      │ Nothing yet — wait for evaluation                          │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Evaluation          │ Metrics file (for dvc metrics diff) │ Log metrics, params, model, signature — this is the moment │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Registration        │ Nothing                             │ Register model to registry, set stage                      │
+├─────────────────────┼─────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ Serving (app)       │ Nothing — consumes DVC files        │ Nothing — consumes registered model                        │
+└─────────────────────┴─────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+```
+
+### The Key Insight
+
+**DVC saves happen during the pipeline** — they're the outputs that flow between stages.
+
+**MLflow logging happens at evaluation time** — that's when you have results worth recording. You don't log to MLflow during training because you don't have metrics yet. You log everything together in evaluation: the model, its params, its metrics, its signature.
+
+### Overlap is OK
+
+`model.pkl` exists in **both** DVC and MLflow — that's intentional:
+- **DVC copy**: pipeline artifact, lets the next stage run
+- **MLflow copy**: experiment artifact, tied to a run_id, deployable from the registry
+
+They serve different purposes even though it's the same file.

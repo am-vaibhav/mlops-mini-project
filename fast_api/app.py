@@ -4,15 +4,25 @@ from fastapi.templating import Jinja2Templates
 import pickle
 import pandas as pd
 from preprocessing_utility import normalize_text
-
-
 import mlflow
-mlflow.set_tracking_uri("https://dagshub.com/vaibhav.vaibhav.rai009/mlops-mini-project.mlflow")
-import dagshub
-dagshub.init(repo_owner='vaibhav.vaibhav.rai009', repo_name='mlops-mini-project', mlflow=True)
+import os
+
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "vaibhav.vaibhav.rai009"
+repo_name = "mlops-mini-project"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 def get_latest_model_version(model_name):
     client = mlflow.MlflowClient()
@@ -27,11 +37,13 @@ model_version = get_latest_model_version(model_name)
 model_uri = f'models:/{model_name}/{model_version}'
 model = mlflow.pyfunc.load_model(model_uri)
 
-vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+PROJ_ROOT = os.path.dirname(BASE_DIR)
+with open(os.path.join(PROJ_ROOT, 'models', 'vectorizer.pkl'), 'rb') as f:
+    vectorizer = pickle.load(f)
 
 @app.get('/', response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "result": None})
+    return templates.TemplateResponse(request, "index.html", {"result": None})
 
 @app.post('/predict', response_class=HTMLResponse)
 async def predict(request: Request, text: str = Form(...)):
@@ -43,8 +55,8 @@ async def predict(request: Request, text: str = Form(...)):
 
     result = model.predict(features_df)
 
-    return templates.TemplateResponse("index.html", {"request": request, "result": result[0]})
+    return templates.TemplateResponse(request, "index.html", {"result": result[0]})
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8040)
+    uvicorn.run(app, port= 8050, log_level="info")

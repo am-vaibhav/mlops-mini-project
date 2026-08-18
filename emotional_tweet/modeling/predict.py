@@ -1,10 +1,12 @@
-import numpy as np
 import pandas as pd
 import pickle
 import json
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 import os
 import logging
+import mlflow
+from mlflow.models import infer_signature
+
 # logging configuration
 logger = logging.getLogger('model_evaluation')
 logger.setLevel('DEBUG')
@@ -49,12 +51,18 @@ metrics_dict = {
 with open(str(REPORTS_DIR / 'metrics_dict.json'), 'w') as f:
     json.dump(metrics_dict, f)
 
-import mlflow
-from mlflow.models import infer_signature
-mlflow.set_tracking_uri("https://dagshub.com/vaibhav.vaibhav.rai009/mlops-mini-project.mlflow")
-import dagshub
-dagshub.init(repo_owner='vaibhav.vaibhav.rai009', repo_name='mlops-mini-project', mlflow=True)
 
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "vaibhav.vaibhav.rai009"
+repo_name = "mlops-mini-project"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 mlflow.set_experiment("dvc-pipeline")
 
 with mlflow.start_run() as run:  # Start an MLflow run
