@@ -48,11 +48,11 @@ jobs:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
         run: python scripts/promote_model.py
 
-      - name: Run Flask app tests
+      - name: Run Fast app tests
         if: success()
         env:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
-        run: python -m unittest tests/test_flask_app.py
+        run: python -m unittest tests/test_fast_app.py
 
       - name: Login to AWS ECR
         if: success()
