@@ -1,10 +1,21 @@
 from pathlib import Path
+import logging
+# logging configuration
+logger = logging.getLogger('data_ingestion')
+logger.setLevel('DEBUG')
 
-from dotenv import load_dotenv
-from loguru import logger
+console_handler = logging.StreamHandler()
+console_handler.setLevel('DEBUG')
 
-# Load environment variables from .env file if it exists
-load_dotenv()
+file_handler = logging.FileHandler('errors.log')
+file_handler.setLevel('ERROR')
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 # Paths
 PROJ_ROOT = Path(__file__).resolve().parents[1]
@@ -23,13 +34,3 @@ MODELS_DIR = PROJ_ROOT / "models"
 
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
-
-# If tqdm is installed, configure loguru with tqdm.write
-# https://github.com/Delgan/loguru/issues/135
-try:
-    from tqdm import tqdm
-
-    logger.remove(0)
-    logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-except ModuleNotFoundError:
-    pass
