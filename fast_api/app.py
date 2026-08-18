@@ -6,6 +6,8 @@ import pandas as pd
 from preprocessing_utility import normalize_text
 import mlflow
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")

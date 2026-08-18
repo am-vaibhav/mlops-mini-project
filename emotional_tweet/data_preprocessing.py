@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import nltk
 nltk.download('stopwords')
+nltk.download('wordnet')
 from emotional_tweet.config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
 
