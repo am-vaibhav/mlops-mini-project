@@ -3,6 +3,8 @@ import re
 import string
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+import nltk
+nltk.download('stopwords')
 
 def lemmatization(text):
     """Lemmatize the text."""

@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import mlflow
+from dotenv import load_dotenv
+load_dotenv()
 # Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")
 os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token

@@ -6,6 +6,8 @@ import os
 import logging
 import mlflow
 from mlflow.models import infer_signature
+from dotenv import load_dotenv
+load_dotenv()
 
 # logging configuration
 logger = logging.getLogger('model_evaluation')
