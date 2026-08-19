@@ -193,3 +193,4 @@ cython_debug/
 temp
 models
 data
+mlops-mini-project-keypair.pem
