@@ -83,8 +83,12 @@ jobs:
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/emotions:v1
             docker stop my-app || true 
             docker rm my-app || true
-            docker run -it -p 80:8050 --name my-app -e DAGSHUB_PAT=${{ secrets.DAGSHUB_PAT }} ${{ secrets.DOCKER_HUB_USERNAME }}/emotions:v1
-            
+            docker run -d \
+              --restart unless-stopped \
+              -p 80:8050 \
+              --name my-app \
+              -e DAGSHUB_PAT=${{ secrets.DAGSHUB_PAT }} \
+              ${{ secrets.DOCKER_HUB_USERNAME }}/emotions:v1            
 
       #      - name: Login to AWS ECR
 #        if: success()
