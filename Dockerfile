@@ -12,4 +12,4 @@ RUN python -m nltk.downloader stopwords wordnet
 
 EXPOSE 8050
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8050", "--log-level", "info"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8050", "--log-level", "info"]
