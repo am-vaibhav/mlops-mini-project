@@ -80,9 +80,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           # we add ||(i.e. or) true because if script get failed like docker stop my-app then also it not give error and run next script
           script: |
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/emotions:v1
-            docker stop my-app || true 
+            docker stop my-app || true
             docker rm my-app || true
+            docker system prune -af
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/emotions:v1
             docker run -d \
               --restart unless-stopped \
               -p 80:8050 \
