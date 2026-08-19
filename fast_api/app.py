@@ -39,8 +39,9 @@ model_version = get_latest_model_version(model_name)
 model_uri = f'models:/{model_name}/{model_version}'
 model = mlflow.pyfunc.load_model(model_uri)
 
-PROJ_ROOT = os.path.dirname(BASE_DIR)
-with open(os.path.join(PROJ_ROOT, 'models', 'vectorizer.pkl'), 'rb') as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(BASE_DIR, 'models', 'vectorizer.pkl'), 'rb') as f:
     vectorizer = pickle.load(f)
 
 @app.get('/', response_class=HTMLResponse)
