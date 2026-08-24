@@ -113,17 +113,17 @@ jobs:
         run: |
           docker push 376129864263.dkr.ecr.us-west-2.amazonaws.com/mlops-mini-project-registry:latest
 
-#      # Zip the required files
-#      - name: Zip files for deployment
-#        if: success()
-#        run: |
-#          zip -r deployment.zip appspec.yml deploy/scripts/install_dependencies.sh deploy/scripts/start_docker.sh
-#
-#      # Upload the ZIP file to S3
-#      - name: Upload ZIP to S3
-#        if: success()
-#        run: |
-#          aws s3 cp deployment.zip s3://campusxcodedeploybucket/deployment.zip
+      # Zip the required files
+      - name: Zip files for deployment
+        if: success()
+        run: |
+          zip -r deployment.zip appspec.yml deploy/scripts/install_dependencies.sh deploy/scripts/start_docker.sh
+
+      # Upload the ZIP file to S3
+      - name: Upload ZIP to S3
+        if: success()
+        run: |
+          aws s3 cp deployment.zip s3://deplyecodedeploybucket/deployment.zip
 #
 #      # Deploy to AWS CodeDeploy using the uploaded ZIP file
 #      - name: Deploy to AWS CodeDeploy
