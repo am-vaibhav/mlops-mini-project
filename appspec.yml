@@ -1,0 +1,15 @@
+version: 1.0
+os: linux
+files:
+  - source: / #location of appspec.yml file
+    destination: /home/ubuntu/app #location at ec2 instance
+hooks:
+  BeforeInstall:
+    - location: deploy/scripts/install_dependencies.sh
+      timeout: 300
+      runas: ubuntu
+
+  ApplicationStart:
+    - location: deploy/scripts/start_docker.sh
+      timeout: 300
+      runas: ubuntu

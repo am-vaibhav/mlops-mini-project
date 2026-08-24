@@ -4,6 +4,11 @@ site_author: vaibhav
 nav:
   - Overview: index.md
   - Getting Started: getting-started.md
+  - Project Config: project-config.md
   - DVC Pipeline: pipeline.md
   - Experiments: experiments.md
   - DVC & MLflow: dvc-and-mlflow.md
+  - FastAPI App: fastapi-app.md
+  - Testing: testing.md
+  - Deployment: deployment.md
+  - CLI Commands: cli-commands.md

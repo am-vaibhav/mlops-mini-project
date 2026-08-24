@@ -19,32 +19,58 @@ This project builds an end-to-end MLOps pipeline for classifying tweet emotions 
 
 ```text
 mlops-mini-project/
+├── .dvc/
+│   └── config                 # DVC remote configuration (S3 bucket)
+├── .github/
+│   └── workflows/
+│       └── ci.yaml            # GitHub Actions CI/CD pipeline
 ├── data/
-│   ├── raw/                  # Train/test split (DVC tracked)
-│   ├── processed/            # Cleaned text data (DVC tracked)
-│   └── features/             # TF-IDF features (DVC tracked)
+│   ├── raw/                   # Train/test split (DVC tracked)
+│   ├── processed/             # Cleaned text data (DVC tracked)
+│   └── features/              # TF-IDF features (DVC tracked)
 ├── models/
-│   └── model.pkl             # Trained model (DVC tracked)
+│   ├── model.pkl              # Trained model (DVC tracked)
+│   └── vectorizer.pkl         # TF-IDF vectorizer (DVC tracked)
 ├── reports/
-│   ├── metrics_dict.json     # Evaluation metrics (DVC metric)
-│   └── model_info.json       # MLflow run_id and model_id
-├── emotional_tweet/          # Source code package
-│   ├── config.py             # All path constants (PROJ_ROOT, DATA_DIR, etc.)
-│   ├── dataset.py            # Stage 1: Data ingestion
-│   ├── data_preprocessing.py # Stage 2: Text preprocessing
-│   ├── features.py           # Stage 3: TF-IDF feature engineering
+│   ├── metrics_dict.json      # Evaluation metrics (DVC metric, Git tracked)
+│   └── model_info.json        # MLflow run_id and model_id
+├── emotional_tweet/           # Source code package
+│   ├── __init__.py
+│   ├── config.py              # All path constants (PROJ_ROOT, DATA_DIR, etc.)
+│   ├── dataset.py             # Stage 1: Data ingestion
+│   ├── data_preprocessing.py  # Stage 2: Text preprocessing
+│   ├── features.py            # Stage 3: TF-IDF feature engineering
+│   ├── plots.py               # Plotting (placeholder)
 │   └── modeling/
+│       ├── __init__.py
 │       ├── train.py           # Stage 4: Model training
 │       ├── predict.py         # Stage 5: Evaluation + MLflow logging
 │       └── register_model.py  # Stage 6: Model registry
+├── fast_api/                  # FastAPI serving app
+│   ├── app.py                 # FastAPI application
+│   ├── preprocessing_utility.py # Text preprocessing for serving
+│   ├── requirements.txt       # App-only dependencies (for Docker)
+│   ├── models/
+│   │   └── vectorizer.pkl     # Vectorizer copy (for serving)
+│   └── templates/
+│       └── index.html         # Web UI
+├── tests/
+│   ├── test_model.py          # Model loading, signature, performance tests
+│   └── test_fast_app.py       # API endpoint tests
 ├── notebooks/                 # Standalone experiments
 │   ├── dagshub_setup.py       # DagsHub + MLflow connection test
 │   ├── exp1_bow_vs_tfidf.py   # BoW vs TF-IDF comparison
 │   └── exp3_lor_bow_hp.py     # LogisticRegression hyperparameter tuning
+├── docs/                      # MkDocs documentation
+│   ├── mkdocs.yml
+│   └── docs/
+├── Dockerfile                 # Container definition for deployment
+├── Makefile                   # Project automation commands
 ├── dvc.yaml                   # DVC pipeline definition
 ├── dvc.lock                   # DVC pipeline state (auto-generated)
 ├── params.yaml                # Hyperparameters
-└── requirements.txt
+├── requirements.txt           # Full project dependencies
+└── .env                       # Environment variables (not in Git)
 ```
 
 ---

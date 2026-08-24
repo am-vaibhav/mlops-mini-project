@@ -1,0 +1,40 @@
+- create a new launch template
+    - create a new IAM role - EC2_Codedeploy_role -> policy - AmazonEC2RoleforAWSCodeDeploy
+    - create a new IAM role - EC2_ECR_role -> policy - AmazonEC2ContainerRegistryReadOnly
+    - install and codedeploy agent in using User data
+
+**********************************************************************
+
+#!/bin/bash
+
+# Update the package list
+sudo apt-get update -y
+
+# Install wget
+sudo apt-get install -y wget
+
+# Download the CodeDeploy agent installer for us-west-2
+cd /home/ubuntu
+wget https://aws-codedeploy-us-west-2.s3.us-west-2.amazonaws.com/latestv2/install
+
+# Make the installer executable
+chmod +x ./install
+
+# Install the CodeDeploy agent
+sudo ./install auto
+
+# Start the CodeDeploy agent
+sudo systemctl start codedeploy-agent
+
+# Enable CodeDeploy agent to start automatically after reboot
+sudo systemctl enable codedeploy-agent
+
+
+**********************************************************************
+
+- create a new ASG using the above launch template
+
+- check if codedeploy agent is running - sudo systemctl status codedeploy-agent
+if not then:
+Check User Data logs:
+sudo cat /var/log/cloud-init-output.log
