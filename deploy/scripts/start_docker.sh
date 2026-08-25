@@ -1,29 +1,23 @@
 #!/bin/bash
-export PATH=$PATH:/usr/local/bin
+# Login to AWS ECR
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 376129864263.dkr.ecr.us-west-2.amazonaws.com
 
-# Start Docker
-sudo systemctl start docker
+# Pull the latest image
+docker pull 376129864263.dkr.ecr.us-west-2.amazonaws.com/mlops-mini-project-registry
 
-# Login to ECR
-aws ecr get-login-password \
-    --region us-west-2 \
-    | sudo docker login \
-    --username AWS \
-    --password-stdin \
-    376129864263.dkr.ecr.us-west-2.amazonaws.com
-
-# Pull latest image
-sudo docker pull \
-    376129864263.dkr.ecr.us-west-2.amazonaws.com/mlops-mini-project-registry
-
-# Remove existing container if present
-if [ "$(sudo docker ps -aq -f name=^my-app$)" ]; then
-    sudo docker stop my-app || true
-    sudo docker rm my-app || true
+# Check if the container 'campusx-app' is running
+if [ "$(docker ps -q -f name=my-app)" ]; then
+    # Stop the running container
+    docker stop my-app
 fi
 
-# Run application
-sudo docker run -d \
+# Check if the container 'campusx-app' exists (stopped or running)
+if [ "$(docker ps -aq -f name=my-app)" ]; then
+    # Remove the container if it exists
+    docker rm my-app
+fi
+
+docker run -d \
     --restart unless-stopped \
     -p 80:8050 \
     -e DAGSHUB_PAT="f78fe5bc73f4a44d60ebcd6ad5bd9b7b67c5e460" \
