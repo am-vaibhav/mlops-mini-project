@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH=$PATH:/usr/local/bin
 
 # Start Docker
 sudo systemctl start docker
